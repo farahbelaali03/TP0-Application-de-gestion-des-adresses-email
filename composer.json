@@ -1,0 +1,9 @@
+{
+    "name": "ensa-tetouan/gestion-emails",
+    "description": "TP-0 - Application de gestion des adresses email",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "phpmailer/phpmailer": "^6.9"
+    }
+}
