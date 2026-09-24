@@ -104,6 +104,10 @@ if ($action === 'ajouter') {
         $erreurAjout = "Cette adresse n'a pas un format email valide.";
     } elseif (EmailValidator::existeDansFichier($nouvelEmail, $fichierEmails)) {
         $erreurAjout = "Cette adresse existe déjà dans la liste.";
+    } elseif (!EmailValidator::domaineExiste($nouvelEmail)) {
+        $erreurAjout = "Le domaine de cette adresse n'existe pas.";
+    } elseif (!EmailValidator::serveurMailExiste($nouvelEmail)) {
+        $erreurAjout = "Ce domaine n'a pas de serveur de messagerie (MX).";
     } else {
         file_put_contents($fichierEmails, $nouvelEmail . PHP_EOL, FILE_APPEND);
         $resultatAjout = "Adresse ajoutée avec succès : " . htmlspecialchars($nouvelEmail);
