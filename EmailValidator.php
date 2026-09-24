@@ -16,9 +16,9 @@ class EmailValidator
     private const PATTERN = "/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/";
 
     /**
-     * Vérifie qu'un email a un format valide (syntaxe uniquement,
-     * ne vérifie PAS que le domaine existe réellement - ça viendra
-     * plus tard avec une validation avancée séparée).
+     * Vérifie qu'un email a un format valide (syntaxe uniquement).
+     * Pour vérifier que le domaine existe, voir domaineExiste() et
+     * serveurMailExiste() plus bas.
      *
      * "static" = on appelle EmailValidator::isValid(...) directement,
      * sans avoir besoin de faire new EmailValidator() avant.
@@ -49,5 +49,32 @@ class EmailValidator
         // in_array() cherche une valeur dans un tableau et retourne true/false.
         // true en 3e argument = comparaison stricte (respecte la casse et le type).
         return in_array(trim($email), $lignes, true);
+    }
+
+    /**
+     * Validation avancée 1 : vérifie que le domaine existe
+     * (il a une adresse IP ou un serveur de messagerie).
+     */
+    public static function domaineExiste(string $email): bool
+    {
+        // strrchr() renvoie tout ce qui suit le dernier "@" (avec le "@"),
+        // substr(..., 1) enlève le "@" pour ne garder que le domaine.
+        $domaine = substr(strrchr(trim($email), '@') ?: '', 1);
+        if ($domaine === '') {
+            return false;
+        }
+
+        // checkdnsrr() interroge le DNS : A = IPv4, AAAA = IPv6, MX = serveur mail.
+        return checkdnsrr($domaine, 'A') || checkdnsrr($domaine, 'AAAA') || checkdnsrr($domaine, 'MX');
+    }
+
+    /**
+     * Validation avancée 2 : vérifie que le domaine a un serveur de
+     * messagerie (enregistrement MX).
+     */
+    public static function serveurMailExiste(string $email): bool
+    {
+        $domaine = substr(strrchr(trim($email), '@') ?: '', 1);
+        return $domaine !== '' && checkdnsrr($domaine, 'MX');
     }
 }
